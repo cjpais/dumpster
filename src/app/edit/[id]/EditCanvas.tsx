@@ -1,67 +1,83 @@
 "use client";
 
 import { DndContext } from "@dnd-kit/core";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Draggable from "./Draggable";
 import Droppable from "./Droppable";
+import { ImageSidebar } from "./ImageSidebar";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
-const EditCanvas = () => {
-  const [draggablePositions, setDraggablePositions] = useState<any[]>([]);
+interface DraggableItem {
+  id: string;
+  x: number;
+  y: number;
+  type: "image";
+  url: string;
+}
 
-  useEffect(() => {
-    // Generate random positions only on the client side
-    const initialPositions = [
-      { id: "1", x: Math.random() * 300, y: Math.random() * 300, z: 1 },
-      { id: "2", x: Math.random() * 300, y: Math.random() * 300, z: 1 },
-      { id: "3", x: Math.random() * 300, y: Math.random() * 300, z: 1 },
-    ];
-    setDraggablePositions(initialPositions);
-  }, []);
+const EditCanvas = ({ pageId }: { pageId: string }) => {
+  const [draggableItems, setDraggableItems] = useState<DraggableItem[]>([]);
+  const { uploadImage } = useImageUpload(pageId);
 
   const handleDragEnd = (event: any) => {
-    console.log(event);
     const { active, delta, over } = event;
-    if (over) {
-      setDraggablePositions((positions) =>
-        positions.map((pos) =>
-          pos.id === active.id
-            ? {
-                ...pos,
-                x: pos.x + delta.x,
-                y: pos.y + delta.y,
-              }
-            : pos
-        )
-      );
+    
+    if (over?.id === "canvas") {
+      // If it's a new image from the sidebar
+      if (active.data?.current?.type === "image" && !draggableItems.find(item => item.id === active.id)) {
+        setDraggableItems(items => [...items, {
+          id: active.id,
+          x: event.over.rect.left + delta.x,
+          y: event.over.rect.top + delta.y,
+          type: "image",
+          url: active.data.current.url
+        }]);
+      } else {
+        // Update position of existing item
+        setDraggableItems((items) =>
+          items.map((item) =>
+            item.id === active.id
+              ? {
+                  ...item,
+                  x: item.x + delta.x,
+                  y: item.y + delta.y,
+                }
+              : item
+          )
+        );
+      }
     }
   };
 
   return (
     <div className="flex">
       <DndContext onDragEnd={handleDragEnd}>
-        {draggablePositions.map((position, i) => (
+        <ImageSidebar onImageUpload={uploadImage} />
+        
+        {draggableItems.map((item) => (
           <Draggable
-            key={position.id}
-            position={position}
-            id={position.id}
+            key={item.id}
+            id={item.id}
+            data={{ type: item.type, url: item.url }}
             styles={{
               position: "absolute",
-              left: position.x,
-              top: position.y,
+              left: item.x,
+              top: item.y,
+              zIndex: 10,
             }}
           >
             <img
-              height={100}
-              width={100}
-              src={`https://cappy.space/cappy/cappy${i + 1}.jpeg`}
+              src={item.url}
+              alt=""
+              className="w-24 h-24 object-cover rounded-lg shadow-lg"
             />
           </Draggable>
         ))}
+        
         <Droppable
-          id="palette"
-          className="w-96 h-screen bg-pink-300"
-        ></Droppable>
-        <Droppable id="canvas" className="w-full h-screen bg-slate-700" />
+          id="canvas"
+          className="flex-1 h-screen bg-slate-700 relative"
+        />
       </DndContext>
     </div>
   );

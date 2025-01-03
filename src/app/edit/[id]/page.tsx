@@ -1,12 +1,10 @@
 import React from "react";
 import EditCanvas from "./EditCanvas";
 
-const EditPage = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const id = (await params).id;
-
+const EditPage = async ({ params }: { params: { id: string } }) => {
   return (
     <div>
-      <EditCanvas />
+      <EditCanvas pageId={params.id} />
     </div>
   );
 };
