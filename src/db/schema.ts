@@ -7,13 +7,12 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
-// Table for web pages
 export const pages = sqliteTable(
   "pages",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     slug: text("slug").notNull(),
-    editId: text("edit_id").notNull(), // UUID for editing
+    editId: text("edit_id").notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -22,27 +21,25 @@ export const pages = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
-    // Changed from object to array syntax
     uniqueIndex("slug_idx").on(table.slug),
     uniqueIndex("edit_id_idx").on(table.editId),
   ]
 );
 
-// Table for reusable content
 export const contents = sqliteTable("contents", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey().notNull(),
   type: text("type", {
     enum: ["image", "video", "audio", "text", "html"],
   }).notNull(),
-  content: text("content"), // For text/HTML content
-  mediaUrl: text("media_url"), // For media content (R2 URL)
-  metadata: text("metadata"), // JSON string for arbitrary metadata
+  content: text("content"),
+  mediaUrl: text("media_url"),
+  metadata: text("metadata"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-// Junction table for pages and content
+// Combined table for library and placement
 export const pageContents = sqliteTable(
   "page_contents",
   {
@@ -50,18 +47,18 @@ export const pageContents = sqliteTable(
     pageId: integer("page_id")
       .notNull()
       .references(() => pages.id, { onDelete: "cascade" }),
-    contentId: integer("content_id")
+    contentId: text("content_id")
       .notNull()
       .references(() => contents.id, { onDelete: "cascade" }),
-    positionX: integer("position_x").notNull(),
-    positionY: integer("position_y").notNull(),
+    positionX: integer("position_x"),
+    positionY: integer("position_y"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
-    // Adding indexes for foreign keys for better performance
-    index("page_content_page_id_idx").on(table.pageId),
-    index("page_content_content_id_idx").on(table.contentId),
+    index("page_contents_page_id_idx").on(table.pageId),
+    index("page_contents_content_id_idx").on(table.contentId),
+    uniqueIndex("page_content_unique_idx").on(table.pageId, table.contentId),
   ]
 );

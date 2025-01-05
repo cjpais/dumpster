@@ -38,7 +38,7 @@ const EditCanvas = () => {
 
   return (
     <div className="flex">
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragEnd={handleDragEnd} id="context">
         {draggablePositions.map((position, i) => (
           <Draggable
             key={position.id}
