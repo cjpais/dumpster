@@ -24,7 +24,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Look up the page using editId
     const [page] = await db
       .select()
       .from(pages)
@@ -38,10 +37,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get file extension from original filename
     const extension = file.name.split(".").pop() || "";
-
-    // Compute file hash
     const buffer = Buffer.from(await file.arrayBuffer());
     const hash = crypto.createHash("sha256").update(buffer).digest("hex");
     const newFilename = `${hash}.${extension}`;
@@ -49,10 +45,7 @@ export async function POST(request: Request) {
     if (file.type.startsWith("video/")) contentType = "video";
     if (file.type.startsWith("audio/")) contentType = "audio";
 
-    // Check if file already exists
     let existed = false;
-
-    // Check if file exists in R2
     try {
       await r2Client.send(
         new HeadObjectCommand({
@@ -62,7 +55,6 @@ export async function POST(request: Request) {
       );
       existed = true;
     } catch {
-      // Upload if doesn't exist
       await r2Client.send(
         new PutObjectCommand({
           Bucket: process.env.R2_BUCKET_NAME,
@@ -74,43 +66,59 @@ export async function POST(request: Request) {
     }
     const fileUrl = `https://files.dumpster.page/${newFilename}`;
 
-    const result = await db.transaction(async (tx) => {
-      // Insert or ignore content
-      await tx
-        .insert(contents)
-        .values({
-          id: hash,
-          type: contentType,
-          mediaUrl: fileUrl,
-          metadata: JSON.stringify({
-            originalName: file.name,
-            mimeType: file.type,
-            size: file.size,
-          }),
-        })
-        .onConflictDoNothing();
+    try {
+      const result = await db.transaction(async (tx) => {
+        await tx
+          .insert(contents)
+          .values({
+            id: hash,
+            type: contentType,
+            mediaUrl: fileUrl,
+            metadata: JSON.stringify({
+              originalName: file.name,
+              mimeType: file.type,
+              size: file.size,
+            }),
+          })
+          .onConflictDoNothing();
 
-      // Insert page content relationship with position
-      const [pageContent] = await tx
-        .insert(pageContents)
-        .values({
-          pageId: page.id,
-          contentId: hash,
-          positionX: metadata.position?.x ?? null,
-          positionY: metadata.position?.y ?? null,
-        })
-        .returning();
+        const [pageContent] = await tx
+          .insert(pageContents)
+          .values({
+            pageId: page.id,
+            contentId: hash,
+            positionX: metadata.position?.x ?? null,
+            positionY: metadata.position?.y ?? null,
+          })
+          .returning();
 
-      return pageContent;
-    });
+        return pageContent;
+      });
 
-    return NextResponse.json({
-      success: true,
-      filename: newFilename,
-      url: `https://files.dumpster.page/${newFilename}`,
-      existed: false,
-    });
+      return NextResponse.json({
+        success: true,
+        filename: newFilename,
+        url: `https://files.dumpster.page/${newFilename}`,
+        existed: existed,
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes("unique constraint")
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Content already exists on this page",
+            existed: true,
+          },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
   } catch (error) {
+    console.log("Error:", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }
