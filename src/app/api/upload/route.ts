@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       const parsedMetadata = JSON.parse(metadataStr);
       metadata = UploadMetadataSchema.parse(parsedMetadata);
     } catch (error) {
+      console.error("Invalid metadata format:", error);
       return NextResponse.json(
         { error: "Invalid metadata format" },
         { status: 400 }
@@ -86,6 +87,7 @@ export async function POST(request: Request) {
           .insert(pageContents)
           .values({
             pageId: page.id,
+            editId: page.editId,
             contentId: hash,
             positionX: metadata.position?.x ?? null,
             positionY: metadata.position?.y ?? null,

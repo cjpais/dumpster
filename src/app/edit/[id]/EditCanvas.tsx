@@ -1,66 +1,47 @@
 "use client";
 
 import { DndContext } from "@dnd-kit/core";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Draggable from "./Draggable";
 import Droppable from "./Droppable";
+import useCanvasStore from "@/lib/useCanvas";
+import MediaElement from "./Blocks";
 
 const EditCanvas = () => {
-  const [draggablePositions, setDraggablePositions] = useState<any[]>([]);
+  const { elements, updateElementPosition } = useCanvasStore();
 
-  useEffect(() => {
-    // Generate random positions only on the client side
-    const initialPositions = [
-      { id: "1", x: Math.random() * 300, y: Math.random() * 300, z: 1 },
-      { id: "2", x: Math.random() * 300, y: Math.random() * 300, z: 1 },
-      { id: "3", x: Math.random() * 300, y: Math.random() * 300, z: 1 },
-    ];
-    setDraggablePositions(initialPositions);
-  }, []);
+  console.log(elements);
 
   const handleDragEnd = (event: any) => {
-    console.log(event);
     const { active, delta, over } = event;
     if (over) {
-      setDraggablePositions((positions) =>
-        positions.map((pos) =>
-          pos.id === active.id
-            ? {
-                ...pos,
-                x: pos.x + delta.x,
-                y: pos.y + delta.y,
-              }
-            : pos
-        )
-      );
+      const position = elements[active.id].position;
+      updateElementPosition(active.id, {
+        x: position.x + delta.x,
+        y: position.y + delta.y,
+        z: position.z,
+      });
     }
   };
 
   return (
     <div className="flex">
       <DndContext onDragEnd={handleDragEnd} id="context">
-        {draggablePositions.map((position, i) => (
+        {Object.entries(elements).map(([id, element]) => (
           <Draggable
-            key={position.id}
-            position={position}
-            id={position.id}
+            key={id}
+            position={element.position}
+            id={id}
             styles={{
               position: "absolute",
-              left: position.x,
-              top: position.y,
+              left: element.position.x,
+              top: element.position.y,
             }}
           >
-            <img
-              height={100}
-              width={100}
-              src={`https://cappy.space/cappy/cappy${i + 1}.jpeg`}
-            />
+            {/* <div className="w-[100opx] h-[100px] bg-gray-400"></div> */}
+            <MediaElement canvasElement={element} />
           </Draggable>
         ))}
-        <Droppable
-          id="palette"
-          className="w-96 h-screen bg-pink-300"
-        ></Droppable>
         <Droppable id="canvas" className="w-full h-screen bg-slate-700" />
       </DndContext>
     </div>

@@ -39,7 +39,6 @@ export const contents = sqliteTable("contents", {
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-// Combined table for library and placement
 export const pageContents = sqliteTable(
   "page_contents",
   {
@@ -47,6 +46,9 @@ export const pageContents = sqliteTable(
     pageId: integer("page_id")
       .notNull()
       .references(() => pages.id, { onDelete: "cascade" }),
+    editId: text("edit_id") // Add this new column
+      .notNull()
+      .references(() => pages.editId), // Reference the edit_id from pages
     contentId: text("content_id")
       .notNull()
       .references(() => contents.id, { onDelete: "cascade" }),
@@ -58,6 +60,7 @@ export const pageContents = sqliteTable(
   },
   (table) => [
     index("page_contents_page_id_idx").on(table.pageId),
+    index("page_contents_edit_id_idx").on(table.editId), // Add this index
     index("page_contents_content_id_idx").on(table.contentId),
     uniqueIndex("page_content_unique_idx").on(table.pageId, table.contentId),
   ]
