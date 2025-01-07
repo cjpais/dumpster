@@ -35,6 +35,14 @@ const ToolbarFileInput = ({
   );
 };
 
+function getRelativePosition(absoluteX: number, absoluteY: number) {
+  // Calculate position relative to vertical center line
+  const relativeX = absoluteX - window.innerWidth / 2;
+  const relativeY = absoluteY;
+
+  return { x: relativeX, y: relativeY };
+}
+
 const Toolbar = ({ editId }: { editId: string }) => {
   const { addElement, elements } = useCanvasStore();
   const handleAddText = () => {
@@ -101,6 +109,17 @@ const Toolbar = ({ editId }: { editId: string }) => {
 
   const handleSave = async () => {
     console.log("Saving page:", elements);
+
+    const elementsRelativelyPositioned = Object.values(elements).map(
+      (element) => {
+        const { x, y } = getRelativePosition(
+          element.position.x,
+          element.position.y
+        );
+        return { ...element, x, y };
+      }
+    );
+
     try {
       const response = await fetch("/api/page/save", {
         method: "POST",
@@ -108,7 +127,7 @@ const Toolbar = ({ editId }: { editId: string }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          elements: Object.values(elements),
+          elements: elementsRelativelyPositioned,
           editId,
         }),
       });

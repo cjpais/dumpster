@@ -21,22 +21,10 @@ body {
 } */
 
 /* globals.css */
-.drag-drop-container {
-  --container-width: 600px;
-}
 
-.drag-drop-container .position-context {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
-
-.drag-drop-container .draggable-item {
+.draggable-item {
   position: absolute;
-  left: calc(50% - (var(--container-width) / 2) + var(--x));
+  left: calc(50vw + var(--x));
   top: var(--y);
   pointer-events: auto;
 }

@@ -1,7 +1,6 @@
 "use client";
 import { useDraggable } from "@dnd-kit/core";
 import React, { PropsWithChildren } from "react";
-import { CSS } from "@dnd-kit/utilities";
 
 interface DraggableProps extends PropsWithChildren {
   position: {
@@ -10,29 +9,26 @@ interface DraggableProps extends PropsWithChildren {
     z: number;
   };
   id: string;
-  styles?: React.CSSProperties;
 }
 
-const Draggable: React.FC<DraggableProps> = ({
-  children,
-  id,
-  position,
-  styles,
-}) => {
+const Draggable: React.FC<DraggableProps> = ({ children, id, position }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
   });
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        boxShadow: "0 5px 15px rgba(0,0,0,1)",
-      }
-    : {};
+
+  const style = {
+    "--x": `${position.x}px`,
+    "--y": `${position.y}px`,
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
+  } as React.CSSProperties;
 
   return (
     <button
       ref={setNodeRef}
-      style={{ ...style, ...styles }}
+      className="draggable-item"
+      style={style}
       {...listeners}
       {...attributes}
     >

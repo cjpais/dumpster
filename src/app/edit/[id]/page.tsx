@@ -74,9 +74,11 @@ const EditPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   console.log("Contents:", contents);
   return (
     <CanvasProvider data={contents}>
-      <UploadFile page={id} />
-      <EditCanvas />
-      <Toolbar editId={id} />
+      <div className="w-full h-screen bg-slate-700">
+        <UploadFile page={id} />
+        <EditCanvas />
+        <Toolbar editId={id} />
+      </div>
     </CanvasProvider>
   );
 };

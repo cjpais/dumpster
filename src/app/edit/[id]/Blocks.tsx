@@ -1,4 +1,5 @@
 import { CanvasElement } from "@/lib/types";
+import React from "react";
 
 const ImageComponent: React.FC<{ element: CanvasElement }> = ({ element }) => (
   <img src={element.url} alt="" className="max-w-[200px]" />
@@ -40,4 +41,4 @@ const MediaElement: React.FC<{ canvasElement: CanvasElement }> = ({
   }
 };
 
-export default MediaElement;
+export default React.memo(MediaElement);
