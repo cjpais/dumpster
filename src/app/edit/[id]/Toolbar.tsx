@@ -36,10 +36,11 @@ const ToolbarFileInput = ({
 };
 
 const Toolbar = ({ editId }: { editId: string }) => {
-  const { addElement } = useCanvasStore();
+  const { addElement, elements } = useCanvasStore();
   const handleAddText = () => {
     addElement({
       id: uuidv4(),
+      contentId: uuidv4(),
       type: "text",
       position: {
         x: 50,
@@ -86,6 +87,7 @@ const Toolbar = ({ editId }: { editId: string }) => {
 
       addElement({
         id: uuidv4(),
+        contentId: data.contentId,
         type: "image",
         position,
         url: data.url,
@@ -97,12 +99,31 @@ const Toolbar = ({ editId }: { editId: string }) => {
     }
   };
 
+  const handleSave = async () => {
+    console.log("Saving page:", elements);
+    try {
+      const response = await fetch("/api/page/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          elements: Object.values(elements),
+          editId,
+        }),
+      });
+      if (!response.ok) throw new Error("Save failed");
+    } catch (error) {
+      console.error("Error saving page:", error);
+    }
+  };
+
   return (
     <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-pink-100 p-4 rounded-lg shadow-md flex justify-around items-center gap-2">
       <ToolbarButton onClick={handleAddText}>Add Text</ToolbarButton>
       <ToolbarFileInput onChange={handleFileUpload} />
       <ToolbarButton onClick={() => {}}>Generate Image</ToolbarButton>
-      <ToolbarButton onClick={() => {}}>Save</ToolbarButton>
+      <ToolbarButton onClick={handleSave}>Save</ToolbarButton>
     </div>
   );
 };

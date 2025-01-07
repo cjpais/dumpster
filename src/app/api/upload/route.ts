@@ -6,6 +6,7 @@ import { UploadMetadata, UploadMetadataSchema } from "@/lib/types";
 import { contents, pageContents, pages } from "@/db/schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: Request) {
   try {
@@ -86,11 +87,15 @@ export async function POST(request: Request) {
         const [pageContent] = await tx
           .insert(pageContents)
           .values({
+            id: uuidv4(),
             pageId: page.id,
             editId: page.editId,
             contentId: hash,
-            positionX: metadata.position?.x ?? null,
-            positionY: metadata.position?.y ?? null,
+            x: metadata.position?.x ?? null,
+            y: metadata.position?.y ?? null,
+            z: metadata.position?.z ?? null,
+            width: 200,
+            height: 200,
           })
           .returning();
 

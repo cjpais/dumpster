@@ -24,8 +24,12 @@ async function getPageContentsByEditId(
           createdAt: contents.createdAt,
         },
         placement: {
-          positionX: pageContents.positionX,
-          positionY: pageContents.positionY,
+          id: pageContents.id,
+          x: pageContents.x,
+          y: pageContents.y,
+          z: pageContents.z,
+          width: pageContents.width,
+          height: pageContents.height,
         },
       })
       .from(pageContents)
@@ -38,24 +42,19 @@ async function getPageContentsByEditId(
 
     // Transform the result into CanvasElement[]
     const canvasElements: CanvasElement[] = result.map((row) => {
-      // Parse metadata for width and height
-      const metadata = row.content.metadata as {
-        width?: number;
-        height?: number;
-      } | null;
-
       return {
-        id: row.content.id,
+        id: row.placement.id,
+        contentId: row.content.id,
         type: row.content.type,
         content: row.content.content || undefined,
         url: row.content.mediaUrl || undefined,
         position: {
-          x: row.placement.positionX ?? 0, // Default to 0 if null
-          y: row.placement.positionY ?? 0, // Default to 0 if null
-          z: 0,
+          x: row.placement.x ?? 0, // Default to 0 if null
+          y: row.placement.y ?? 0, // Default to 0 if null
+          z: row.placement.z ?? 0, // Default to 0 if null
         },
-        width: metadata?.width || 100,
-        height: metadata?.height || 100,
+        width: row?.placement?.width || 100,
+        height: row?.placement?.height || 100,
         isSelected: false,
         isEditing: false,
       };

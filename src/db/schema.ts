@@ -42,7 +42,7 @@ export const contents = sqliteTable("contents", {
 export const pageContents = sqliteTable(
   "page_contents",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey().notNull(),
     pageId: integer("page_id")
       .notNull()
       .references(() => pages.id, { onDelete: "cascade" }),
@@ -52,8 +52,11 @@ export const pageContents = sqliteTable(
     contentId: text("content_id")
       .notNull()
       .references(() => contents.id, { onDelete: "cascade" }),
-    positionX: integer("position_x"),
-    positionY: integer("position_y"),
+    x: integer("x"),
+    y: integer("y"),
+    z: integer("z"),
+    width: integer("width"),
+    height: integer("height"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

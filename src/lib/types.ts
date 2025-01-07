@@ -14,22 +14,33 @@ export const UploadMetadataSchema = z.object({
 
 export type UploadMetadata = z.infer<typeof UploadMetadataSchema>;
 
-export type CanvasPosition = {
-  x: number;
-  y: number;
-  z: number;
-};
+export const CanvasPositionSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
+});
 
-export type ElementType = "image" | "video" | "audio" | "text" | "html";
+export const ElementTypeSchema = z.enum([
+  "image",
+  "video",
+  "audio",
+  "text",
+  "html",
+]);
 
-export type CanvasElement = {
-  id: string;
-  type: ElementType;
-  content?: string;
-  url?: string;
-  position: CanvasPosition;
-  width: number;
-  height: number;
-  isSelected: boolean;
-  isEditing: boolean;
-};
+export const CanvasElementSchema = z.object({
+  id: z.string(),
+  contentId: z.string(),
+  type: ElementTypeSchema,
+  content: z.string().optional(),
+  url: z.string().optional(),
+  position: CanvasPositionSchema,
+  width: z.number(),
+  height: z.number(),
+  isSelected: z.boolean().optional(),
+  isEditing: z.boolean().optional(),
+});
+
+export type CanvasPosition = z.infer<typeof CanvasPositionSchema>;
+export type ElementType = z.infer<typeof ElementTypeSchema>;
+export type CanvasElement = z.infer<typeof CanvasElementSchema>;
