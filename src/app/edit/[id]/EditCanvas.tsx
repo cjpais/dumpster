@@ -1,19 +1,28 @@
 "use client";
 
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Draggable from "./Draggable";
 import useCanvasStore from "@/lib/useCanvas";
 import MediaElement from "./Blocks";
 
 const EditCanvas = () => {
   const { elements, updateElementPosition } = useCanvasStore();
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const canvasRef = useRef(null);
+
+  const handleCanvasClick = (event: React.MouseEvent<HTMLElement>) => {
+    const isDraggableElement = (event.target as HTMLElement).closest(
+      '[data-draggable="true"]'
+    );
+    if (!isDraggableElement) {
+      setSelectedElement(null);
+    }
+  };
 
   function getRelativePosition(absoluteX: number, absoluteY: number) {
-    // Calculate position relative to vertical center line
     const relativeX = absoluteX - window.innerWidth / 2;
     const relativeY = absoluteY;
-
     return { x: relativeX, y: relativeY };
   }
 
@@ -21,7 +30,6 @@ const EditCanvas = () => {
     const { active, delta } = event;
     const position = elements[active.id].position;
 
-    // Get and log relative position
     if (!active.rect.current.translated) return;
     const relativePos = getRelativePosition(
       active.rect.current.translated.left,
@@ -37,13 +45,39 @@ const EditCanvas = () => {
   };
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <div className="relative min-h-screen w-full">
+    <DndContext
+      onDragEnd={handleDragEnd}
+      onDragStart={(e) => {
+        console.log(e);
+        setSelectedElement(e.active.id as string);
+      }}
+      onDragCancel={() => setSelectedElement(null)}
+    >
+      <div
+        className="relative min-h-screen w-full"
+        ref={canvasRef}
+        onClick={handleCanvasClick}
+      >
         <div className="absolute inset-0">
           {Object.entries(elements).map(([id, element]) => (
-            <Draggable key={id} position={element.position} id={id}>
-              <MediaElement canvasElement={element} />
-            </Draggable>
+            <div key={id} className="relative">
+              <Draggable
+                position={element.position}
+                id={id}
+                selected={selectedElement === id}
+              >
+                <div
+                  data-draggable="true"
+                  className={`relative ${
+                    selectedElement === id
+                      ? "outline outline-2 outline-blue-500"
+                      : ""
+                  }`}
+                >
+                  <MediaElement canvasElement={element} />
+                </div>
+              </Draggable>
+            </div>
           ))}
         </div>
       </div>

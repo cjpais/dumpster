@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently --kill-others --names client,worker --prefix-colors blue,red \"bun run dev:client\" \"bun run dev:worker\"",
+    "dev:client": "next dev",
+    "dev:worker": "wrangler dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -16,22 +18,36 @@
     "@aws-sdk/s3-presigned-post": "^3.722.0",
     "@dnd-kit/core": "^6.3.1",
     "@libsql/client": "^0.14.0",
+    "@tldraw/sync": "^3.7.2",
+    "@tldraw/sync-core": "^3.7.2",
+    "@tldraw/tlschema": "^3.7.2",
+    "cloudflare-workers-unfurl": "^0.0.7",
     "drizzle-orm": "^0.38.3",
     "es-toolkit": "^1.31.0",
+    "itty-router": "^5.0.18",
+    "lodash.throttle": "^4.1.1",
     "next": "15.1.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tldraw": "^3.7.2",
     "uuid": "^11.0.3",
     "zod": "^3.24.1",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@cloudflare/types": "^6.29.1",
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react-swc": "^3.7.2",
+    "concurrently": "^9.1.2",
     "drizzle-kit": "^0.30.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^6.0.7",
+    "wrangler": "^3.103.2"
   }
 }

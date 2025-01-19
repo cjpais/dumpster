@@ -20,8 +20,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 } */
 
-/* globals.css */
-
 .draggable-item {
   position: absolute;
   left: calc(50vw + var(--x));

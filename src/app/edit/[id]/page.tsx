@@ -5,14 +5,37 @@ import Toolbar from "./Toolbar";
 import CanvasProvider from "./CanvasProvider";
 
 import { eq } from "drizzle-orm";
-import { contents, pageContents } from "@/db/schema";
+import { contents, pageContents, pages } from "@/db/schema";
 import { db } from "@/lib/db";
 import { CanvasElement } from "@/lib/types";
 
+async function pageExistsByEditId(editId: string): Promise<boolean> {
+  try {
+    const result = await db
+      .select({ id: pages.id })
+      .from(pages)
+      .where(eq(pages.editId, editId))
+      .limit(1);
+
+    console.log(result);
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error checking page existence:", error);
+    return false;
+  }
+}
+
 async function getPageContentsByEditId(
   editId: string
-): Promise<CanvasElement[]> {
+): Promise<CanvasElement[] | null> {
   try {
+    const exists = await pageExistsByEditId(editId);
+
+    if (!exists) {
+      return null;
+    }
+
     const result = await db
       .select({
         content: {
@@ -70,6 +93,10 @@ async function getPageContentsByEditId(
 const EditPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const id = (await params).id;
   const contents = await getPageContentsByEditId(id);
+
+  if (!contents) {
+    return <div>Page not found</div>;
+  }
 
   console.log("Contents:", contents);
   return (
