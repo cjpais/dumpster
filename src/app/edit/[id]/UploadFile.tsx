@@ -13,7 +13,7 @@ const UploadFile = ({ page }: { page: string }) => {
     try {
       const metadata: UploadMetadata = {
         editId: page,
-        position: position,
+        position: { ...position, z: 0 },
       };
       const formData = new FormData();
       formData.append("file", file);

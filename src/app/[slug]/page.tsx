@@ -10,7 +10,7 @@ import { eq } from "drizzle-orm";
 import React from "react";
 import StaticBlocks from "./StaticBlocks";
 
-export async function getPageContentsBySlug(slug: string) {
+async function getPageContentsBySlug(slug: string) {
   const result = await db
     .select({
       page: {

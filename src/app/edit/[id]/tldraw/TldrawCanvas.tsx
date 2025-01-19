@@ -1,9 +1,10 @@
 "use client";
 
 import { useSync } from "@tldraw/sync";
-import { Tldraw } from "tldraw";
+import { Tldraw, useEditor } from "tldraw";
 import { multiplayerAssetStore } from "@/lib/multiplayerAssetStore";
 import { getBookmarkPreview } from "@/lib/getBookmarkPreview";
+import CustomTldrawCamera from "./CustomTldrawCamera";
 
 const TldrawCanvas = ({ roomId }: { roomId: string }) => {
   const store = useSync({
@@ -23,7 +24,10 @@ const TldrawCanvas = ({ roomId }: { roomId: string }) => {
         // when the editor is ready, we need to register our bookmark unfurling service
         editor.registerExternalAssetHandler("url", getBookmarkPreview);
       }}
-    />
+    >
+      <div className="fixed left-1/2 top-0 w-[1px] h-screen bg-black"></div>
+      <CustomTldrawCamera />
+    </Tldraw>
   );
 };
 
