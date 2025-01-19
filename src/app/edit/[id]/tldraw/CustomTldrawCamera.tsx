@@ -15,11 +15,11 @@ const cameraOptions: TLCameraOptions = {
     bounds: {
       x: 0,
       y: 0,
-      w: 600,
+      w: 1600,
       h: 10000,
     },
     behavior: { x: "contain", y: "contain" },
-    padding: { x: 100, y: 100 },
+    padding: { x: 0, y: 0 },
     origin: { x: 0.5, y: 0 },
   },
 };
