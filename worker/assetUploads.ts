@@ -36,6 +36,7 @@ export async function handleAssetDownload(
 
   // if we have a cached response for this request (automatically handling ranges etc.), return it
   const cacheKey = new Request(request.url, { headers: request.headers });
+  // @ts-ignore
   const cachedResponse = await caches.default.match(cacheKey);
   if (cachedResponse) {
     return cachedResponse;
@@ -95,6 +96,7 @@ export async function handleAssetDownload(
   if (status === 200) {
     const [cacheBody, responseBody] = body!.tee();
     ctx.waitUntil(
+      // @ts-ignore
       caches.default.put(cacheKey, new Response(cacheBody, { headers, status }))
     );
     return new Response(responseBody, { headers, status });
