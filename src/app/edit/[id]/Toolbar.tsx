@@ -91,7 +91,10 @@ const Toolbar = ({ editId }: { editId: string }) => {
       });
 
       if (!response.ok) throw new Error("Upload failed");
-      const data = await response.json();
+      const data = (await response.json()) as {
+        contentId: string;
+        url: string;
+      };
 
       addElement({
         id: uuidv4(),

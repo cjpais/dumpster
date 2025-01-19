@@ -33,7 +33,12 @@ export async function getBookmarkPreview({
         process.env.NEXT_PUBLIC_TLDRAW_WORKER_URL
       }/unfurl?url=${encodeURIComponent(url)}`
     );
-    const data = await response.json();
+    const data = (await response.json()) as {
+      description: string;
+      image: string;
+      favicon: string;
+      title: string;
+    };
 
     // fill in our asset with whatever info we found
     asset.props.description = data?.description ?? "";
