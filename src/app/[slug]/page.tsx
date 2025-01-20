@@ -1,106 +1,50 @@
-import {
-  CanvasElement,
-  CanvasElementSchema,
-  CanvasPositionSchema,
-  ElementTypeSchema,
-} from "@/lib/types";
-import { contents, pageContents, pages } from "@/db/schema";
-import { db } from "@/lib/db";
+import { pages } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
 import React from "react";
-import StaticBlocks from "./StaticBlocks";
+import "tldraw/tldraw.css";
+import StaticTldrawCanvas from "./StaticTldrawCanvas";
 
-async function getPageContentsBySlug(slug: string) {
+const getEditIdBySlug = async (slug: string) => {
   const result = await db
     .select({
-      page: {
-        id: pages.id,
-        slug: pages.slug,
-        createdAt: pages.createdAt,
-        updatedAt: pages.updatedAt,
-      },
-      content: {
-        id: contents.id,
-        type: contents.type,
-        content: contents.content,
-        mediaUrl: contents.mediaUrl,
-        metadata: contents.metadata,
-        createdAt: contents.createdAt,
-      },
-      pageContent: {
-        id: pageContents.id,
-        x: pageContents.x,
-        y: pageContents.y,
-        z: pageContents.z,
-        width: pageContents.width,
-        height: pageContents.height,
-        createdAt: pageContents.createdAt,
-      },
+      id: pages.id,
+      editId: pages.editId,
     })
     .from(pages)
-    .leftJoin(pageContents, eq(pages.id, pageContents.pageId))
-    .leftJoin(contents, eq(pageContents.contentId, contents.id))
     .where(eq(pages.slug, slug));
 
   if (result.length === 0) {
     return null;
   }
 
-  const page = result[0].page;
-  const pageContentsData = result
-    .filter((row) => row.content !== null && row.pageContent !== null)
-    .map((row) => ({
-      id: row.pageContent!.id,
-      contentId: row.content!.id,
-      type: row.content!.type,
-      content: row.content!.content,
-      url: row.content!.mediaUrl,
-      position: {
-        x: row.pageContent!.x,
-        y: row.pageContent!.y,
-        z: row.pageContent!.z,
-      },
-      width: row.pageContent!.width,
-      height: row.pageContent!.height,
-      isSelected: false,
-      isEditing: false,
-    }));
+  return result[0].editId;
+};
 
-  return {
-    page,
-    contents: CanvasElementSchema.array().parse(pageContentsData),
-  };
-}
-
-const ItemComponent = ({ element }: { element: CanvasElement }) => {
-  const style = {
-    "--x": `${element.position.x}px`,
-    "--y": `${element.position.y}px`,
-  } as React.CSSProperties;
-
-  return (
-    <div className="draggable-item" style={style}>
-      <StaticBlocks canvasElement={element} />
-    </div>
-  );
+const getSnapshotByEditId = async (editId: string) => {
+  const result = (
+    await fetch(
+      `${process.env.NEXT_PUBLIC_TLDRAW_WORKER_URL}/snapshot/${editId}`
+    )
+  ).json();
+  return result;
 };
 
 const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const slug = (await params).slug;
-  const page = await getPageContentsBySlug(slug);
+  const pageId = await getEditIdBySlug(slug);
 
-  if (!page) {
+  if (!pageId) {
     return <div>Page not found</div>;
   }
 
+  const snapshot = await getSnapshotByEditId(pageId);
+
+  console.log(snapshot);
+
   return (
-    <div className="relative w-full min-h-screen">
-      <div className="absolute left-1/2 h-full w-[1px] bg-gray-300" />
-      <div className="absolute mx-auto min-h-screen">
-        {page.contents.map((item) => (
-          <ItemComponent key={item.id} element={item} />
-        ))}
-      </div>
+    <div style={{ position: "fixed", inset: 0 }}>
+      <StaticTldrawCanvas snapshot={snapshot} />
     </div>
   );
 };

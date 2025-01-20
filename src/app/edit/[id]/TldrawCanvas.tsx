@@ -1,7 +1,7 @@
 "use client";
 
 import { useSync } from "@tldraw/sync";
-import { Tldraw, useEditor } from "tldraw";
+import { BreakPointProvider, Tldraw, useEditor } from "tldraw";
 import { multiplayerAssetStore } from "@/lib/multiplayerAssetStore";
 import { getBookmarkPreview } from "@/lib/getBookmarkPreview";
 import CustomTldrawCamera from "./CustomTldrawCamera";
@@ -25,8 +25,10 @@ const TldrawCanvas = ({ roomId }: { roomId: string }) => {
         editor.registerExternalAssetHandler("url", getBookmarkPreview);
       }}
     >
-      <div className="fixed left-1/2 top-0 w-[1px] h-screen bg-black"></div>
-      <CustomTldrawCamera />
+      <BreakPointProvider>
+        {/* <div className="fixed left-[calc(50%-288px)] top-0 w-[576px] h-screen bg-[#0001]"></div> */}
+        <CustomTldrawCamera />
+      </BreakPointProvider>
     </Tldraw>
   );
 };
