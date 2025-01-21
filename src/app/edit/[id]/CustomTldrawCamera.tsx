@@ -8,7 +8,7 @@ const cameraOptions: TLCameraOptions = {
   wheelBehavior: "pan",
   panSpeed: 1,
   zoomSpeed: 1,
-  zoomSteps: [0.1, 0.25, 0.5, 1, 2, 4, 8],
+  zoomSteps: [0.01, 0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 32],
   constraints: {
     initialZoom: "fit-x",
     baseZoom: "default",
@@ -18,7 +18,7 @@ const cameraOptions: TLCameraOptions = {
       w: 500,
       h: 100000,
     },
-    behavior: { x: "fixed", y: "contain" },
+    behavior: { x: "free", y: "free" },
     padding: { x: 0, y: 0 },
     origin: { x: 0.5, y: 0 },
   },
@@ -46,7 +46,7 @@ const CustomTldrawCamera = () => {
           immediate: true,
         }
       );
-      //   editor.zoomToFit();
+      editor.zoomToFit();
       //   editor.resetZoom();
 
       //   if (breakpoint > 4) {
