@@ -32,8 +32,16 @@ const CustomTldrawCamera = () => {
     if (!editor) return;
     editor.run(() => {
       editor.setCameraOptions(cameraOptions);
+      const camera = editor.getCamera();
+      const viewportSize = editor.getViewportScreenBounds();
+      const baseWidth = Math.max(576, viewportSize.width);
+      const baseHeight = baseWidth / (19.5 / 9);
+      const scaleFactor = Math.min(viewportSize.height / baseHeight, 1.68);
       editor.setCamera(
-        { ...editor.getCamera(), z: 1.0 },
+        {
+          ...camera,
+          z: scaleFactor,
+        },
         {
           immediate: true,
         }
