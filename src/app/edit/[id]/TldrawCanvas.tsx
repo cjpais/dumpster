@@ -1,10 +1,51 @@
 "use client";
 
 import { useSync } from "@tldraw/sync";
-import { BreakPointProvider, Tldraw, useEditor } from "tldraw";
+import {
+  ArrowShapeTool,
+  AssetToolbarItem,
+  BreakPointProvider,
+  DefaultToolbar,
+  DrawToolbarItem,
+  EllipseToolbarItem,
+  RectangleToolbarItem,
+  SelectToolbarItem,
+  TextToolbarItem,
+  TLComponents,
+  Tldraw,
+  TriangleToolbarItem,
+  DiamondToolbarItem,
+  HexagonToolbarItem,
+  OvalToolbarItem,
+  RhombusToolbarItem,
+  StarToolbarItem,
+  CloudToolbarItem,
+  XBoxToolbarItem,
+} from "tldraw";
 import { multiplayerAssetStore } from "@/lib/multiplayerAssetStore";
 import { getBookmarkPreview } from "@/lib/getBookmarkPreview";
 import CustomTldrawCamera from "./CustomTldrawCamera";
+
+const components: TLComponents = {
+  Toolbar: () => (
+    <DefaultToolbar>
+      <div className="flex flex-col">
+        <div className="flex">
+          <SelectToolbarItem />
+          <TextToolbarItem />
+          <DrawToolbarItem />
+          <AssetToolbarItem />
+        </div>
+        <div className="flex">
+          <RectangleToolbarItem />
+          <EllipseToolbarItem />
+          <TriangleToolbarItem />
+          <StarToolbarItem />
+        </div>
+      </div>
+    </DefaultToolbar>
+  ),
+};
 
 const TldrawCanvas = ({ roomId }: { roomId: string }) => {
   const store = useSync({
@@ -18,6 +59,7 @@ const TldrawCanvas = ({ roomId }: { roomId: string }) => {
     <Tldraw
       // we can pass the connected store into the Tldraw component which will handle
       // loading states & enable multiplayer UX like cursors & a presence menu
+      components={components}
       options={{ maxPages: 1 }}
       store={store}
       onMount={(editor) => {

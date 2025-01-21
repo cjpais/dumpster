@@ -44,3 +44,10 @@ export const CanvasElementSchema = z.object({
 export type CanvasPosition = z.infer<typeof CanvasPositionSchema>;
 export type ElementType = z.infer<typeof ElementTypeSchema>;
 export type CanvasElement = z.infer<typeof CanvasElementSchema>;
+
+export interface LocalPage {
+  id: number;
+  editId: string;
+  slug: string;
+  lastVisited: number;
+}
