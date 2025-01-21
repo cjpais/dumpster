@@ -63,6 +63,7 @@ const StaticTldrawCanvas = ({ snapshot }: { snapshot: any }) => {
       // loading states & enable multiplayer UX like cursors & a presence menu
       options={{ maxPages: 1 }}
       //   store={store}
+      tools={[]}
       snapshot={ss}
       onUiEvent={() => {}}
       //   components={components}
@@ -73,7 +74,9 @@ const StaticTldrawCanvas = ({ snapshot }: { snapshot: any }) => {
         // when the editor is ready, we need to register our bookmark unfurling service
         // editor.registerExternalAssetHandler("url", getBookmarkPreview);
         editor.updateInstanceState({ isReadonly: true });
-        // editor.setCurrentTool("hand");
+
+        editor.setCurrentTool("hand");
+        editor.setCursor({ type: "default", rotation: 0 });
       }}
     >
       <BreakPointProvider>
