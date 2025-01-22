@@ -33,8 +33,12 @@ const getPageFromEditId = async (editId: string): Promise<null | LocalPage> => {
   return page;
 };
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const roomId = params.id;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const roomId = (await params).id;
   const page = await getPageFromEditId(roomId);
 
   if (!page) {

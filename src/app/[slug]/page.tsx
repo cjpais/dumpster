@@ -27,9 +27,9 @@ const getSnapshotByEditId = async (editId: string) => {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const roomId = params.slug;
+  const roomId = (await params).slug;
   const page = await getPageBySlug(roomId);
 
   if (!page) {
