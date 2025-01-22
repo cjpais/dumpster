@@ -26,3 +26,8 @@ export default function Home() {
     </div>
   );
 }
+
+export const metadata = {
+  title: "dumpster page",
+  description: "encouraging a raccoon revolution",
+};
