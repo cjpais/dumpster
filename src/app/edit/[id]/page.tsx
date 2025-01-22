@@ -33,6 +33,22 @@ const getPageFromEditId = async (editId: string): Promise<null | LocalPage> => {
   return page;
 };
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const roomId = params.id;
+  const page = await getPageFromEditId(roomId);
+
+  if (!page) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return {
+    title: `Edit ${page.slug}`,
+    description: `Edit ${page.slug}`,
+  };
+}
+
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const roomId = (await params).id;
   const page = await getPageFromEditId(roomId);
@@ -42,7 +58,12 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0 }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+      }}
+    >
       <LocalPageProvider page={page}>
         <TldrawCanvas roomId={roomId} />
       </LocalPageProvider>

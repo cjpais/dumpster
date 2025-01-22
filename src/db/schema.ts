@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import {
   integer,
   text,
@@ -19,52 +19,12 @@ export const pages = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
+    title: text("title"),
+    description: text("description"),
+    backgroundColor: text("background_color"),
   },
   (table) => [
     uniqueIndex("slug_idx").on(table.slug),
     uniqueIndex("edit_id_idx").on(table.editId),
-  ]
-);
-
-export const contents = sqliteTable("contents", {
-  id: text("id").primaryKey().notNull(),
-  type: text("type", {
-    enum: ["image", "video", "audio", "text", "html"],
-  }).notNull(),
-  content: text("content"),
-  mediaUrl: text("media_url"),
-  metadata: text("metadata"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-});
-
-export const pageContents = sqliteTable(
-  "page_contents",
-  {
-    id: text("id").primaryKey().notNull(),
-    pageId: integer("page_id")
-      .notNull()
-      .references(() => pages.id, { onDelete: "cascade" }),
-    editId: text("edit_id") // Add this new column
-      .notNull()
-      .references(() => pages.editId), // Reference the edit_id from pages
-    contentId: text("content_id")
-      .notNull()
-      .references(() => contents.id, { onDelete: "cascade" }),
-    x: integer("x"),
-    y: integer("y"),
-    z: integer("z"),
-    width: integer("width"),
-    height: integer("height"),
-    createdAt: integer("created_at", { mode: "timestamp" })
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-  },
-  (table) => [
-    index("page_contents_page_id_idx").on(table.pageId),
-    index("page_contents_edit_id_idx").on(table.editId), // Add this index
-    index("page_contents_content_id_idx").on(table.contentId),
-    uniqueIndex("page_content_unique_idx").on(table.pageId, table.contentId),
   ]
 );

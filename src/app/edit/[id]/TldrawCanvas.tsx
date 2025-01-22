@@ -21,31 +21,11 @@ import {
   StarToolbarItem,
   CloudToolbarItem,
   XBoxToolbarItem,
+  DefaultBackground,
 } from "tldraw";
 import { multiplayerAssetStore } from "@/lib/multiplayerAssetStore";
 import { getBookmarkPreview } from "@/lib/getBookmarkPreview";
 import CustomTldrawCamera from "./CustomTldrawCamera";
-
-const components: TLComponents = {
-  Toolbar: () => (
-    <DefaultToolbar>
-      <div className="flex flex-col">
-        <div className="flex">
-          <SelectToolbarItem />
-          <TextToolbarItem />
-          <DrawToolbarItem />
-          <AssetToolbarItem />
-        </div>
-        <div className="flex">
-          <RectangleToolbarItem />
-          <EllipseToolbarItem />
-          <TriangleToolbarItem />
-          <StarToolbarItem />
-        </div>
-      </div>
-    </DefaultToolbar>
-  ),
-};
 
 const TldrawCanvas = ({ roomId }: { roomId: string }) => {
   const store = useSync({
@@ -54,6 +34,28 @@ const TldrawCanvas = ({ roomId }: { roomId: string }) => {
     // ...and how to handle static assets like images & videos
     assets: multiplayerAssetStore,
   });
+
+  const components: TLComponents = {
+    Toolbar: () => (
+      <DefaultToolbar>
+        <div className="flex flex-col">
+          <div className="flex">
+            <SelectToolbarItem />
+            <TextToolbarItem />
+            <DrawToolbarItem />
+            <AssetToolbarItem />
+          </div>
+          <div className="flex">
+            <RectangleToolbarItem />
+            <EllipseToolbarItem />
+            <TriangleToolbarItem />
+            <StarToolbarItem />
+          </div>
+        </div>
+      </DefaultToolbar>
+    ),
+    Background: () => <div className="w-full h-full bg-[#fffaef]"></div>,
+  };
 
   return (
     <Tldraw
@@ -67,6 +69,7 @@ const TldrawCanvas = ({ roomId }: { roomId: string }) => {
         editor.registerExternalAssetHandler("url", getBookmarkPreview);
       }}
     >
+      {/* <DefaultBackground  /> */}
       <BreakPointProvider>
         {/* <div className="fixed left-[calc(50%-288px)] top-0 w-[576px] h-screen bg-[#0001]"></div> */}
         <CustomTldrawCamera />

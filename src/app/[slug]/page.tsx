@@ -5,20 +5,14 @@ import React from "react";
 import "tldraw/tldraw.css";
 import StaticTldrawCanvas from "./StaticTldrawCanvas";
 
-const getEditIdBySlug = async (slug: string) => {
-  const result = await db
-    .select({
-      id: pages.id,
-      editId: pages.editId,
-    })
-    .from(pages)
-    .where(eq(pages.slug, slug));
+const getPageBySlug = async (slug: string) => {
+  const result = await db.select().from(pages).where(eq(pages.slug, slug));
 
   if (result.length === 0) {
     return null;
   }
 
-  return result[0].editId;
+  return result[0];
 };
 
 const getSnapshotByEditId = async (editId: string) => {
@@ -30,15 +24,35 @@ const getSnapshotByEditId = async (editId: string) => {
   return result;
 };
 
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const roomId = params.slug;
+  const page = await getPageBySlug(roomId);
+
+  if (!page) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return {
+    title: `${page.slug}`,
+    description: `${page.slug}`,
+  };
+}
+
 const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const slug = (await params).slug;
-  const pageId = await getEditIdBySlug(slug);
+  const page = await getPageBySlug(slug);
 
-  if (!pageId) {
+  if (!page) {
     return <div>Page not found</div>;
   }
 
-  const snapshot = await getSnapshotByEditId(pageId);
+  const snapshot = await getSnapshotByEditId(page.editId);
 
   console.log(snapshot);
 

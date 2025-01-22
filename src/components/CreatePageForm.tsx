@@ -6,16 +6,22 @@ import { debounce } from "es-toolkit";
 
 interface CreatePageFormProps {
   checkSlug: (slug: string) => Promise<boolean>;
-  createPage: (
-    slug: string
-  ) => Promise<{ success: boolean; editId?: string; error?: string }>;
+  createPage: (params: {
+    slug: string;
+    title: string;
+    description?: string;
+  }) => Promise<{ success: boolean; editId?: string; error?: string }>;
 }
 
 export default function CreatePageForm({
   checkSlug,
   createPage,
 }: CreatePageFormProps) {
-  const [slug, setSlug] = useState("");
+  const [formData, setFormData] = useState({
+    slug: "",
+    title: "",
+    description: "",
+  });
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [createdPage, setCreatedPage] = useState<{
@@ -24,7 +30,6 @@ export default function CreatePageForm({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Create debounced function using useCallback
   const debouncedCheck = useCallback(
     debounce(async (value: string) => {
       if (!value) {
@@ -42,30 +47,40 @@ export default function CreatePageForm({
         setIsChecking(false);
       }
     }, 300),
-    [checkSlug] // Dependencies array
+    [checkSlug]
   );
 
-  // Cleanup the debounced function on component unmount
   useEffect(() => {
     return () => {
       debouncedCheck.cancel();
     };
   }, [debouncedCheck]);
 
-  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-    setSlug(value);
-    debouncedCheck(value);
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    if (name === "slug") {
+      const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+      setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
+      debouncedCheck(sanitizedValue);
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!slug || !isAvailable) return;
+    if (!formData.slug || !isAvailable || !formData.title) return;
 
     try {
-      const result = await createPage(slug);
+      const result = await createPage({
+        slug: formData.slug,
+        title: formData.title,
+        ...(formData.description && { description: formData.description }),
+      });
       if (result.success && result.editId) {
-        setCreatedPage({ slug, editId: result.editId });
+        setCreatedPage({ slug: formData.slug, editId: result.editId });
         setError(null);
       } else {
         setError(result.error || "Failed to create page");
@@ -76,77 +91,111 @@ export default function CreatePageForm({
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-lg mx-auto p-6 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label
             htmlFor="slug"
-            className="block text-sm font-medium text-gray-300"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Page URL
+            Page URL: {`dumpster.page/${formData.slug}`}
           </label>
-          <div className="mt-1 relative">
-            <input
-              type="text"
-              id="slug"
-              value={slug}
-              onChange={handleSlugChange}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1 text-gray-800"
-              placeholder="enter-your-slug"
-            />
-            {isChecking && (
-              <div className="text-sm text-gray-500 mt-1">
-                Checking availability...
-              </div>
-            )}
-            {!isChecking && isAvailable !== null && (
-              <div
-                className={`text-sm mt-1 ${
-                  isAvailable ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {isAvailable
-                  ? `${slug} is available!`
-                  : `${slug} is already taken`}
-              </div>
-            )}
-          </div>
+          <input
+            type="text"
+            id="slug"
+            name="slug"
+            value={formData.slug}
+            onChange={handleInputChange}
+            className="block w-full rounded-md border-gray-300 shadow-md focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+            placeholder="enter-your-url"
+          />
+          {isChecking && (
+            <div className="text-sm text-gray-500 mt-1">
+              Checking availability...
+            </div>
+          )}
+          {!isChecking && isAvailable !== null && (
+            <div
+              className={`text-sm mt-1 ${
+                isAvailable ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {isAvailable
+                ? `${formData.slug} is available!`
+                : `${formData.slug} is already taken`}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Page Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            className="block w-full rounded-md border-gray-300 shadow-md focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+            placeholder="Enter page title"
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Page Description (optional)
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            rows={4}
+            className="block w-full rounded-md border-gray-300 shadow-md focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+            placeholder="Enter page description (optional)"
+          />
         </div>
 
         <button
           type="submit"
-          disabled={!isAvailable || !slug}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+          disabled={!isAvailable || !formData.slug || !formData.title}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           Create Page
         </button>
       </form>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
+        <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-md border border-red-200">
           {error}
         </div>
       )}
 
       {createdPage && (
-        <div className="mt-4 p-4 bg-green-100 text-green-700 rounded-md">
+        <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-md border border-green-200">
           <p>Page created successfully!</p>
-          <p className="mt-2">
+          <div className="mt-4 space-y-2">
             <a
               href={`/${createdPage.slug}`}
-              className="text-blue-600 hover:underline"
+              className="block text-blue-600 hover:text-blue-700 transition-colors"
             >
-              View your page
+              View your page →
             </a>
-          </p>
-          <p className="mt-2">
             <a
               href={`/edit/${createdPage.editId}`}
-              className="text-blue-600 hover:underline"
+              className="block text-blue-600 hover:text-blue-700 transition-colors"
             >
-              Edit your page
+              Edit your page →
             </a>
-          </p>
+          </div>
         </div>
       )}
     </div>

@@ -16,13 +16,17 @@ async function checkSlug(slug: string) {
   return !existingPage;
 }
 
-async function createPage(slug: string) {
+async function createPage(form: {
+  slug: string;
+  title: string;
+  description?: string;
+}) {
   "use server";
 
   try {
     const editId = uuidv4();
     await db.insert(pages).values({
-      slug,
+      ...form,
       editId,
     });
 
