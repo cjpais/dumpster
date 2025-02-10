@@ -22,8 +22,9 @@ const getPageFromEditId = async (editId: string) => {
   return result;
 };
 
-const Page = async ({ params }: { params: { id: string } }) => {
-  const page = await getPageFromEditId(params.id);
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+  const page = await getPageFromEditId(id);
 
   if (!page) {
     return <div>Page not found</div>;

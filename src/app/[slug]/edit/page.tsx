@@ -37,14 +37,12 @@ const getPageFromSlugAndKey = async (
   return page;
 };
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { key?: string };
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ key?: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await props.params;
+  const searchParams = await props.searchParams;
   const key = searchParams.key;
 
   if (!key) {
@@ -63,14 +61,12 @@ export async function generateMetadata({
   };
 }
 
-const Page = async ({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { key?: string };
+const Page = async (props: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ key?: string }>;
 }) => {
-  const { slug } = params;
+  const { slug } = await props.params;
+  const searchParams = await props.searchParams;
   const key = searchParams.key;
 
   if (!key) {
