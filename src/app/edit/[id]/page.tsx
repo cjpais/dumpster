@@ -6,73 +6,30 @@ import { db } from "@/lib/db";
 import { pages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { LocalPage } from "@/lib/types";
+import { redirect } from "next/navigation";
 
-const getPageFromEditId = async (editId: string): Promise<null | LocalPage> => {
+const getPageFromEditId = async (editId: string) => {
   const result = await db
     .select({
-      id: pages.id,
-      editId: pages.editId,
       slug: pages.slug,
+      editId: pages.editId,
     })
     .from(pages)
     .where(eq(pages.editId, editId))
     .limit(1)
     .get();
 
-  if (!result) {
-    return null;
-  }
-
-  const page: LocalPage = {
-    id: result.id,
-    editId: result.editId,
-    slug: result.slug,
-    lastVisited: Date.now(),
-  };
-
-  return page;
+  return result;
 };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const roomId = (await params).id;
-  const page = await getPageFromEditId(roomId);
-
-  if (!page) {
-    return {
-      notFound: true,
-    };
-  }
-
-  return {
-    title: `Edit ${page.slug}`,
-    description: `Edit ${page.slug}`,
-  };
-}
-
-const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const roomId = (await params).id;
-  const page = await getPageFromEditId(roomId);
+const Page = async ({ params }: { params: { id: string } }) => {
+  const page = await getPageFromEditId(params.id);
 
   if (!page) {
     return <div>Page not found</div>;
   }
 
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-      }}
-    >
-      <LocalPageProvider page={page}>
-        <TldrawCanvas roomId={roomId} />
-      </LocalPageProvider>
-    </div>
-  );
+  redirect(`/${page.slug}/edit?key=${page.editId}`);
 };
 
 export default Page;
