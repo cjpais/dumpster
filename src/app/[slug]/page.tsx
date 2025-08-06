@@ -54,6 +54,12 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
   }
 
   const snapshot = await getSnapshotByEditId(page.editId);
+  console.log("snapshot", snapshot);
+
+  // @ts-ignore
+  if (snapshot.status || snapshot.error) {
+    return <div>page not found</div>;
+  }
 
   // Only pass safe data to client component (no editId)
   const pageData = {
