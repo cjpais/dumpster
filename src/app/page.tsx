@@ -4,7 +4,7 @@ import UsersPages from "./UsersPages";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center min-h-screen p-8 max-w-2xl w-full mx-auto">
+    <div className="flex flex-col items-center min-h-screen p-8 max-w-2xl w-full mx-auto gap-4">
       <h1 className="text-4xl mb-4">dumpster.page</h1>
       <div className="flex flex-col text-center max-w-md">
         <p>drag internet garbage onto the canvas</p>
@@ -20,7 +20,7 @@ export default function Home() {
         </Link>
       </div>
       <UsersPages />
-      <Link className="text-blue-500 hover:text-blue-600 mt-12" href="/about">
+      <Link className="text-blue-500 hover:text-blue-600 mt-6" href="/about">
         made for raccoons.
       </Link>
     </div>

@@ -6,11 +6,10 @@ import { db } from "@/lib/db";
 import { pages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { LocalPage } from "@/lib/types";
-import { redirect } from "next/navigation";
 
 const getPageFromSlugAndKey = async (
   slug: string,
-  key: string
+  key: string,
 ): Promise<null | LocalPage> => {
   const result = await db
     .select({
@@ -46,13 +45,13 @@ export async function generateMetadata(props: {
   const key = searchParams.key;
 
   if (!key) {
-    return { notFound: true };
+    return {};
   }
 
   const page = await getPageFromSlugAndKey(slug, key);
 
   if (!page) {
-    return { notFound: true };
+    return {};
   }
 
   return {

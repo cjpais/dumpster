@@ -14,13 +14,18 @@ const LocalPageProvider = ({
   const { upsertPage } = usePagesStore();
 
   useEffect(() => {
+    console.log("PAGES STORE RUNNING");
     upsertPage(page);
   }, [page, upsertPage]);
+
+  useEffect(() => {
+    console.log("TEST PROVIDER");
+  }, []);
 
   const copyToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/${page.slug}`
+        `${window.location.origin}/${page.slug}`,
       );
     } catch (err) {
       console.error("Failed to copy text: ", err);

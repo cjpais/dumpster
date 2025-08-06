@@ -47,7 +47,7 @@ export type CanvasElement = z.infer<typeof CanvasElementSchema>;
 
 export interface LocalPage {
   id: number;
-  editId: string;
+  editId?: string;
   slug: string;
   lastVisited: number;
 }

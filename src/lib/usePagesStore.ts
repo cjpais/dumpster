@@ -16,9 +16,15 @@ const usePagesStore = create<PagesStore>()(
       upsertPage: (page) =>
         set((state) => ({
           pages: state.pages.some((p) => p.id === page.id)
-            ? state.pages.map((p) =>
-                p.id === page.id ? { ...page, lastVisited: Date.now() } : p
-              )
+            ? state.pages.map((p) => {
+                if (p.id === page.id) {
+                  // Preserve existing editId if new page doesn't have one
+                  const editId =
+                    page.editId !== undefined ? page.editId : p.editId;
+                  return { ...page, editId, lastVisited: Date.now() };
+                }
+                return p;
+              })
             : [...state.pages, { ...page, lastVisited: Date.now() }],
         })),
       deletePage: (id) =>
@@ -28,14 +34,14 @@ const usePagesStore = create<PagesStore>()(
       updateLastVisited: (id, time) =>
         set((state) => ({
           pages: state.pages.map((p) =>
-            p.id === id ? { ...p, lastVisited: time } : p
+            p.id === id ? { ...p, lastVisited: time } : p,
           ),
         })),
     }),
     {
       name: "pages-store-v1",
-    }
-  )
+    },
+  ),
 );
 
 export default usePagesStore;
