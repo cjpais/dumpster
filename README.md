@@ -1,36 +1,166 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# dumpster.page
+
+A collaborative drag and drop webpage builder where you can dump anything onto a canvas and share it with the world.
+
+## Overview
+
+dumpster.page is a collaborative drag and drop webpage builder inspired by mmm.page, but with enhanced collaboration features. The original concept was to create a place for sharing photos from events and trips that felt more like a collaborative scrapbook than just a bunch of squares on a screen like iCloud/Google Photos albums.
+
+The core philosophy is simple: no signups, no complex authentication - just claim a URL and put whatever you want on it. You create a dumpster.page with a slug of your choosing, get an editId for collaboration, and share your digital trash heap with the world.
+
+## Features
+
+- **No Authentication Required**: Just pick a URL and start creating
+- **Real-time Collaboration**: Multiple people can edit the same page simultaneously
+- **Drag & Drop Interface**: Intuitive canvas-based editing powered by tldraw
+- **Asset Uploads**: Upload images, documents, and other files directly to your page
+- **Custom Styling**: Set background colors and page metadata
+- **Instant Publishing**: Changes are saved and published automatically
+
+## Architecture
+
+dumpster.page is built with:
+
+- **Frontend**: Next.js 15 with React 19 and TypeScript
+- **Canvas Engine**: tldraw SDK for the collaborative canvas experience
+- **Backend**: Cloudflare Workers with Durable Objects for real-time sync
+- **Database**: Turso (SQLite) with Drizzle ORM
+- **Storage**: Cloudflare R2 for asset uploads
+- **Deployment**: Vercel (frontend) + Cloudflare Workers (backend)
+
+## Application Flow
+
+The application is broken down into four main components:
+
+1. **Index Page** - Landing page and discovery
+2. **Create a new dumpster.page** - Generate a new collaborative canvas
+3. **Edit a dumpster.page** - Real-time collaborative editing with editId
+4. **View a dumpster.page** - Public view of published content
+
+### URL Structure
+
+- `dumpster.page/` - Home page
+- `dumpster.page/create` - Create a new page
+- `dumpster.page/edit/[editId]` - Edit mode (collaborative)
+- `dumpster.page/[slug]` - Public view
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- [Bun](https://bun.sh/) or Node.js 18+
+- [Cloudflare account](https://cloudflare.com/) for Workers and R2
+- [Turso account](https://turso.tech/) for the database
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Database
+TURSO_DATABASE_URL="libsql://"
+TURSO_AUTH_TOKEN=""
+
+# Cloudflare R2 Storage
+R2_ACCESS_KEY_ID=""
+R2_SECRET_ACCESS_KEY=""
+R2_BUCKET_NAME=""
+
+# Cloudflare Worker URL
+NEXT_PUBLIC_TLDRAW_WORKER_URL=""
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/dumpster.git
+cd dumpster
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+```bash
+bun install
+```
 
-## Learn More
+3. Set up the database:
+```bash
+bun run db:generate
+bun run db:migrate
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Start the development server:
+```bash
+bun run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This will start both the Next.js frontend (port 3000) and the Cloudflare Worker (port 5172) in development mode.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Development Scripts
 
-## Deploy on Vercel
+- `bun run dev` - Start both client and worker in development mode
+- `bun run dev:client` - Start only the Next.js development server
+- `bun run dev:worker` - Start only the Cloudflare Worker
+- `bun run build` - Build the Next.js application
+- `bun run db:generate` - Generate database migrations
+- `bun run db:migrate` - Run database migrations
+- `bun run db:studio` - Open Drizzle Studio for database management
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Frontend (Vercel)
+
+The frontend can be deployed to Vercel with zero configuration:
+
+1. Connect your GitHub repository to Vercel
+2. Set the required environment variables
+3. Deploy
+
+### Backend (Cloudflare Workers)
+
+Deploy the worker using Wrangler:
+
+```bash
+wrangler deploy
+```
+
+Make sure to configure:
+- Durable Objects binding: `TLDRAW_DURABLE_OBJECT`
+- R2 bucket binding: `TLDRAW_BUCKET`
+- Environment variables for database access
+
+## Database Schema
+
+The application uses a simple schema with one main table:
+
+```sql
+pages (
+  id INTEGER PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,
+  edit_id TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  title TEXT,
+  description TEXT,
+  background_color TEXT
+)
+```
+
+## Contributing
+
+Contributions are welcome! This project embraces the spirit of creative chaos and collaborative building.
+
+## Examples
+
+Check out some example dumpster pages:
+- [Vintage Computer Festival SoCal 2025](https://dumpster.page/vcf-socal-2025)
+- [Dumpster Factory (features/bugs)](https://dumpster.page/dumpster-factory)
+- [Early 2025](https://dumpster.page/early-2025)
+
+## License
+
+MIT
+
+---
+
+*made for raccoons.* 🦝
